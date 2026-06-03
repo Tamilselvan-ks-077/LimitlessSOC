@@ -1,17 +1,66 @@
-# React + Vite
+# 🛡️ Limitless Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern cybersecurity dashboard built with React that simulates both Blue Team (Defensive Security Operations) and Red Team (Security Assessment Operations) workflows.
 
-Currently, two official plugins are available    :
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 🛡️ Blue Team
 
-## React Compiler
+* Threat Monitor
+* Log Viewer
+* Firewall Manager
+* Vulnerability Scanner
+* Incident Alerts
+* Security Operations Dashboard
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### ⚔️ Red Team
 
-## Expanding the ESLint configuration
+* IP Tracer
+* Port Scanner
+* Recon Tools
+* Payload Lab
+* Report Generator
+* Security Assessment Dashboard
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# LimitlessSOC
+## 📊 Dashboard Overview
+
+* Real-time Security Metrics
+* Threat Statistics
+* System Health Monitoring
+* Security Reports
+* Interactive Team Selection
+
+## 🛠️ Tech Stack
+
+* React.js
+* Vite
+* CSS3
+* React Icons
+
+## 📸 Screenshots
+
+Add screenshots of:
+
+* Team Selection Page
+* Blue Team Dashboard
+* Red Team Dashboard
+
+## 📂 Installation
+
+```bash
+git clone https://github.com/Tamilselvan-ks-077/LimitlessSOC.git
+cd LimitlessSOC
+npm install
+npm run dev
+```
+
+## 🎯 Project Objective
+
+CyberShield provides a simulated Security Operations Center (SOC) environment that demonstrates cybersecurity concepts including threat monitoring, vulnerability assessment, incident management, and security reporting.
+
+## 👨‍💻 Author
+
+Tamilselvan KS
+
+GitHub: https://github.com/Tamilselvan-ks-077
+LinkedIn: [www.linkedin.com/in/tamilselvan-ks](http://www.linkedin.com/in/tamilselvan-ks)
