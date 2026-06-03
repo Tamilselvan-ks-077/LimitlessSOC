@@ -63,4 +63,4 @@ CyberShield provides a simulated Security Operations Center (SOC) environment th
 Tamilselvan KS
 
 GitHub: https://github.com/Tamilselvan-ks-077
-LinkedIn: [www.linkedin.com/in/somasundaram-m-49535032a](http://www.linkedin.com/in/somasundaram-m-49535032a)
+LinkedIn: [www.linkedin.com/in/tamilselvan-ks](http://www.linkedin.com/in/tamilselvan-ks)
