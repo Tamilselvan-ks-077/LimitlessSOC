@@ -1,185 +1,299 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Dashboard from "./pages/Dashboard";
 import TechCanvas from "./components/TechCanvas";
+import BootScreen from "./components/BootScreen";
 import { playHover, playClick, toggleSound, isSoundEnabled } from "./utils/audio";
-import { FaShieldAlt, FaSkullCrossbones, FaVolumeUp, FaVolumeMute, FaLock, FaGlobe, FaSlidersH, FaServer } from "react-icons/fa";
+import { FaShieldAlt, FaSkullCrossbones, FaVolumeUp, FaVolumeMute, FaLock, FaGlobe, FaServer } from "react-icons/fa";
 
-function App() {
-  const [team, setTeam] = useState("");
-  const [sound, setSound] = useState(isSoundEnabled());
-  const [systemTime, setSystemTime] = useState("");
+/* ── Typing animation hook ───────────────────────────────────────────────── */
+function useTyping(strings, speed = 60, pause = 1800) {
+  const [display, setDisplay] = useState("");
+  const idx    = useRef(0);
+  const charI  = useRef(0);
+  const deleting = useRef(false);
+  const timer  = useRef(null);
 
   useEffect(() => {
-    // Generate simulated dynamic time in UTC
-    const updateTime = () => {
-      const now = new Date();
-      setSystemTime(now.toISOString().replace("T", " ").substring(0, 19) + " UTC");
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+    function tick() {
+      const current = strings[idx.current];
+      if (!deleting.current) {
+        setDisplay(current.slice(0, charI.current + 1));
+        charI.current++;
+        if (charI.current === current.length) {
+          deleting.current = true;
+          timer.current = setTimeout(tick, pause);
+          return;
+        }
+      } else {
+        setDisplay(current.slice(0, charI.current - 1));
+        charI.current--;
+        if (charI.current === 0) {
+          deleting.current = false;
+          idx.current = (idx.current + 1) % strings.length;
+        }
+      }
+      timer.current = setTimeout(tick, deleting.current ? speed / 2 : speed);
+    }
+    timer.current = setTimeout(tick, speed);
+    return () => clearTimeout(timer.current);
+  }, []); // eslint-disable-line
+
+  return display;
+}
+
+/* ── 3-D tilt pod hook ───────────────────────────────────────────────────── */
+function useTilt(strength = 12) {
+  const ref  = useRef(null);
+  const raf  = useRef(null);
+
+  const onMove = (e) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width  / 2;
+    const y = e.clientY - rect.top  - rect.height / 2;
+    const rx =  (y / rect.height) * strength;
+    const ry = -(x / rect.width)  * strength;
+    cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
+      if (ref.current)
+        ref.current.style.transform =
+          `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(8px)`;
+    });
+  };
+
+  const onLeave = () => {
+    cancelAnimationFrame(raf.current);
+    if (ref.current)
+      ref.current.style.transform =
+        "perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0)";
+  };
+
+  return { ref, onMove, onLeave };
+}
+
+/* ── Counter component ───────────────────────────────────────────────────── */
+function Counter({ to, suffix = "" }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let n = 0;
+    const step = Math.max(1, Math.floor(to / 40));
+    const t = setInterval(() => {
+      n = Math.min(n + step, to);
+      setVal(n);
+      if (n >= to) clearInterval(t);
+    }, 40);
+    return () => clearInterval(t);
+  }, [to]);
+  return <>{val}{suffix}</>;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+function App() {
+  const [booting, setBooting] = useState(true);
+  const [team, setTeam]       = useState("");
+  const [sound, setSound]     = useState(isSoundEnabled);
+  const [time, setTime]       = useState("");
+
+  const subtitles = useTyping([
+    "COGNITIVE THREAT ANALYSIS & OFFENSIVE SIMULATION",
+    "MILITARY-GRADE CYBER DEFENSE COMMAND CENTER",
+    "REAL-TIME SIEM | RED TEAM | THREAT INTELLIGENCE",
+    "POWERED BY AI · SECURED BY DESIGN",
+  ], 55, 2000);
+
+  const blueTilt = useTilt(10);
+  const redTilt  = useTilt(10);
+
+  useEffect(() => {
+    const tick = () => setTime(
+      new Date().toISOString().replace("T", " ").substring(0, 19) + " UTC"
+    );
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
   }, []);
 
   const handleSoundToggle = () => {
-    const nextState = !sound;
-    setSound(nextState);
-    toggleSound(nextState);
-    if (nextState) {
-      // Play a quick test sound
-      setTimeout(() => playClick(), 50);
-    }
+    const next = !sound;
+    setSound(next);
+    toggleSound(next);
+    if (next) setTimeout(playClick, 50);
   };
 
-  const handleSelectTeam = (selectedTeam) => {
-    playClick();
-    setTeam(selectedTeam);
-  };
+  if (booting) return <BootScreen onComplete={() => setBooting(false)} />;
 
   if (!team) {
     return (
-      <div className="selection-page">
-        {/* Futuristic animated background canvas */}
+      <div className="sel-page">
         <TechCanvas theme="purple" />
+        <div className="scanlines" />
 
-        {/* HUD Header */}
-        <header className="hud-header">
-          <div className="hud-left">
-            <span className="hud-indicator pulse"></span>
-            <span className="hud-title">LIMITLESS SECURE LINK // ACTIVE</span>
+        {/* ── Top HUD bar ── */}
+        <header className="sel-hud">
+          <div className="sel-hud-left">
+            <span className="sel-hud-dot" />
+            <span className="sel-hud-label">LIMITLESS SECURE LINK // ACTIVE</span>
           </div>
-          <div className="hud-right">
-            <span className="hud-timestamp">{systemTime}</span>
-            <button 
-              className={`sound-toggle-btn ${sound ? "active" : ""}`} 
+          <div className="sel-hud-right">
+            <span className="sel-hud-time">{time}</span>
+            <button
+              className={`sel-sound-btn${sound ? " active" : ""}`}
               onClick={handleSoundToggle}
               onMouseEnter={playHover}
-              title={sound ? "Mute Synthesizer" : "Unmute Synthesizer"}
+              title={sound ? "Mute" : "Unmute"}
             >
               {sound ? <FaVolumeUp /> : <FaVolumeMute />}
             </button>
           </div>
         </header>
 
-        {/* Scanlines overlay for CRT effect */}
-        <div className="scanlines"></div>
+        {/* ── Main content ── */}
+        <main className="sel-body">
 
-        <div className="selection-content">
-          <h1 className="cyber-glow-title">
-            LIMITLESS<span className="accent-color">SOC</span>
-          </h1>
-          <p className="cyber-subheading">
-            COGNITIVE THREAT ANALYSIS & SYNERGISTIC OFFENSIVE SIMULATOR
-          </p>
-
-          {/* Main Interactive Deck */}
-          <div className="holographic-deck">
-            {/* Blue Team Selection Pod */}
-            <div 
-              className="selection-pod blue-pod"
-              onMouseEnter={() => {
-                playHover();
-              }}
-              onClick={() => handleSelectTeam("blue")}
-            >
-              <div className="pod-header">
-                <FaShieldAlt className="pod-icon blue-glow-icon" />
-                <span className="pod-badge blue-badge">DEFENSIVE SYSTEM</span>
-              </div>
-              
-              <div className="pod-body">
-                <h2>BLUE TEAM</h2>
-                <p>Deploy security counter-measures, analyze incoming telemetry, patch software vulnerabilities, and monitor firewalls in real-time.</p>
-                
-                <ul className="pod-metrics">
-                  <li><span>SHIELD STATUS:</span> <span className="blue-text font-bold">98.4%</span></li>
-                  <li><span>IDS STATUS:</span> <span className="blue-text font-bold">MONITORING</span></li>
-                  <li><span>ACTIVE COUNTERPLOTS:</span> <span className="blue-text font-bold">12 Active</span></li>
-                </ul>
-              </div>
-
-              <div className="pod-footer">
-                <button className="cyber-btn blue-btn">
-                  INITIALIZE COGNITIVE SHIELD
-                </button>
-              </div>
-            </div>
-
-            {/* Matrix Choice Visual Pod */}
-            <div className="matrix-center-card">
-              <div className="terminal-screen">
-                <div className="terminal-header">
-                  <span className="dot red"></span>
-                  <span className="dot yellow"></span>
-                  <span className="dot green"></span>
-                  <span className="terminal-title">core_selector.sh</span>
-                </div>
-                <div className="terminal-body">
-                  <div className="matrix-visual-wrapper">
-                    <img
-                      src="/matrix-choice.png"
-                      alt="Blue Team vs Red Team"
-                      className="matrix-image"
-                    />
-                    <div className="scanner-line"></div>
-                  </div>
-                  <div className="system-diagnostics">
-                    <div className="diag-row">
-                      <FaLock className="diag-icon" />
-                      <span>SECURE CORRIDOR: ESTABLISHED</span>
-                    </div>
-                    <div className="diag-row">
-                      <FaGlobe className="diag-icon" />
-                      <span>GATEWAY HOPS: 4 (PROXIED)</span>
-                    </div>
-                    <div className="diag-row">
-                      <FaServer className="diag-icon" />
-                      <span>HOST INTEG: SECURE</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Red Team Selection Pod */}
-            <div 
-              className="selection-pod red-pod"
-              onMouseEnter={() => {
-                playHover();
-              }}
-              onClick={() => handleSelectTeam("red")}
-            >
-              <div className="pod-header">
-                <FaSkullCrossbones className="pod-icon red-glow-icon" />
-                <span className="pod-badge red-badge">OFFENSIVE LAYER</span>
-              </div>
-              
-              <div className="pod-body">
-                <h2>RED TEAM</h2>
-                <p>Execute network reconnaissance, launch non-destructive exploit simulations, test egress filters, and audit overall security posture.</p>
-                
-                <ul className="pod-metrics">
-                  <li><span>EXPLOIT STATUS:</span> <span className="red-text font-bold">READY</span></li>
-                  <li><span>TARGET ACQUISITION:</span> <span className="red-text font-bold">12 Targets</span></li>
-                  <li><span>PAYLOAD LAB:</span> <span className="red-text font-bold">COMPILED</span></li>
-                </ul>
-              </div>
-
-              <div className="pod-footer">
-                <button className="cyber-btn red-btn">
-                  ENGAGE OFFENSIVE SYSTEM
-                </button>
-              </div>
-            </div>
+          {/* Hero title */}
+          <div className="sel-hero">
+            <div className="sel-logo-ring" />
+            <h1 className="sel-logo" data-text="LIMITLESSSOC">
+              LIMITLESS<span>SOC</span>
+            </h1>
+            <p className="sel-subtitle">
+              {subtitles}<span className="sel-cursor" />
+            </p>
           </div>
 
-          {/* Footer Security Ticker */}
-          <div className="security-ticker">
-            <div className="ticker-wrapper">
-              <span className="ticker-label">LIVE SOC SECURITY LOGS:</span>
-              <div className="ticker-text">
-                [ALERT] Blocked port scan from 198.51.100.42 • [INFO] Vulnerability scan completed on cluster_B • [SECURE] System integrity verified at 100% • [WARN] Egress traffic spike detected on Node-12 • [ALERT] Zero-day mitigation patch deployed to Web-Proxy •
+          {/* Holographic deck */}
+          <div className="sel-deck">
+
+            {/* ── SIEM / Blue pod ── */}
+            <div
+              className="sel-pod sel-pod--blue"
+              ref={blueTilt.ref}
+              onMouseMove={blueTilt.onMove}
+              onMouseLeave={blueTilt.onLeave}
+              onMouseEnter={playHover}
+              onClick={() => { playClick(); setTeam("blue"); }}
+            >
+              <div className="sel-pod-glow sel-pod-glow--blue" />
+              <div className="sel-pod-header">
+                <FaShieldAlt className="sel-pod-icon sel-pod-icon--blue" />
+                <span className="sel-pod-badge sel-pod-badge--blue">DEFENSIVE SYSTEM</span>
+              </div>
+              <h2 className="sel-pod-title">SIEM</h2>
+              <p className="sel-pod-desc">
+                Deploy security counter-measures, analyze incoming telemetry, patch software vulnerabilities, and monitor firewalls in real-time.
+              </p>
+              <ul className="sel-pod-stats">
+                <li>
+                  <span>SHIELD STATUS</span>
+                  <span className="sel-stat--blue"><Counter to={98} suffix=".4%" /></span>
+                </li>
+                <li>
+                  <span>THREATS BLOCKED</span>
+                  <span className="sel-stat--blue"><Counter to={14832} /></span>
+                </li>
+                <li>
+                  <span>ACTIVE COUNTERPLOTS</span>
+                  <span className="sel-stat--blue"><Counter to={12} suffix=" Active" /></span>
+                </li>
+              </ul>
+              <button className="sel-pod-btn sel-pod-btn--blue">
+                INITIALIZE COGNITIVE SHIELD
+              </button>
+              <div className="sel-pod-corner sel-pod-corner--tl" />
+              <div className="sel-pod-corner sel-pod-corner--br" />
+            </div>
+
+            {/* ── Center terminal ── */}
+            <div className="sel-center">
+              <div className="sel-terminal">
+                <div className="sel-terminal-bar">
+                  <span className="sel-dot sel-dot--red" />
+                  <span className="sel-dot sel-dot--yellow" />
+                  <span className="sel-dot sel-dot--green" />
+                  <span className="sel-terminal-title">core_selector.sh</span>
+                </div>
+                <div className="sel-terminal-body">
+                  <div className="sel-img-wrap">
+                    <img
+                      src="/matrix-choice.png"
+                      alt="SIEM vs Red Team"
+                      className="sel-img"
+                    />
+                    {/* Glitch layers */}
+                    <div className="sel-img-glitch sel-img-glitch--r" />
+                    <div className="sel-img-glitch sel-img-glitch--b" />
+                    <div className="sel-scanner" />
+                  </div>
+                  <div className="sel-diag">
+                    <div className="sel-diag-row">
+                      <FaLock className="sel-diag-icon" />
+                      <span>SECURE CORRIDOR: ESTABLISHED</span>
+                    </div>
+                    <div className="sel-diag-row">
+                      <FaGlobe className="sel-diag-icon" />
+                      <span>GATEWAY HOPS: 4 (PROXIED)</span>
+                    </div>
+                    <div className="sel-diag-row">
+                      <FaServer className="sel-diag-icon" />
+                      <span>HOST INTEGRITY: SECURE</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* ── Red Team pod ── */}
+            <div
+              className="sel-pod sel-pod--red"
+              ref={redTilt.ref}
+              onMouseMove={redTilt.onMove}
+              onMouseLeave={redTilt.onLeave}
+              onMouseEnter={playHover}
+              onClick={() => { playClick(); setTeam("red"); }}
+            >
+              <div className="sel-pod-glow sel-pod-glow--red" />
+              <div className="sel-pod-header">
+                <FaSkullCrossbones className="sel-pod-icon sel-pod-icon--red" />
+                <span className="sel-pod-badge sel-pod-badge--red">OFFENSIVE LAYER</span>
+              </div>
+              <h2 className="sel-pod-title">RED TEAM</h2>
+              <p className="sel-pod-desc">
+                Execute network reconnaissance, launch non-destructive exploit simulations, test egress filters, and audit overall security posture.
+              </p>
+              <ul className="sel-pod-stats">
+                <li>
+                  <span>EXPLOIT STATUS</span>
+                  <span className="sel-stat--red">READY</span>
+                </li>
+                <li>
+                  <span>TARGETS ACQUIRED</span>
+                  <span className="sel-stat--red"><Counter to={12} suffix=" Active" /></span>
+                </li>
+                <li>
+                  <span>PAYLOAD LAB</span>
+                  <span className="sel-stat--red">COMPILED</span>
+                </li>
+              </ul>
+              <button className="sel-pod-btn sel-pod-btn--red">
+                ENGAGE OFFENSIVE SYSTEM
+              </button>
+              <div className="sel-pod-corner sel-pod-corner--tl" />
+              <div className="sel-pod-corner sel-pod-corner--br" />
+            </div>
+
+          </div>
+        </main>
+
+        {/* ── Security ticker ── */}
+        <div className="sel-ticker">
+          <span className="sel-ticker-label">LIVE SOC LOGS</span>
+          <div className="sel-ticker-text">
+            [ALERT] Blocked port scan from 198.51.100.42 &nbsp;•&nbsp;
+            [INFO] Vulnerability scan completed on cluster_B &nbsp;•&nbsp;
+            [SECURE] System integrity verified at 100% &nbsp;•&nbsp;
+            [WARN] Egress traffic spike detected on Node-12 &nbsp;•&nbsp;
+            [ALERT] Zero-day mitigation patch deployed to Web-Proxy &nbsp;•&nbsp;
+            [INFO] Red Team simulation cycle 7 complete &nbsp;•&nbsp;
           </div>
         </div>
       </div>
@@ -189,10 +303,7 @@ function App() {
   return (
     <Dashboard
       team={team}
-      goBack={() => {
-        playClick();
-        setTeam("");
-      }}
+      goBack={() => { playClick(); setTeam(""); }}
       soundEnabled={sound}
       onSoundToggle={handleSoundToggle}
     />

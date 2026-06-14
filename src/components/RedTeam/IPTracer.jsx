@@ -17,7 +17,7 @@ export default function IPTracer() {
   const [traceLog, setTraceLog] = useState([]);
   const [result, setResult] = useState(null);
 
-  const handleTrace = (e) => {
+  const handleTrace = async (e) => {
     e.preventDefault();
     if (!ip) return;
 
@@ -26,28 +26,40 @@ export default function IPTracer() {
     setTraceLog([]);
     setResult(null);
 
-    let stepIdx = 0;
-    const interval = setInterval(() => {
-      if (stepIdx < TRACE_STEPS.length) {
-        setTraceLog(prev => [...prev, `[TRACER] ${TRACE_STEPS[stepIdx]}`]);
-        playKeyboard();
-        stepIdx++;
-      } else {
-        clearInterval(interval);
-        setIsTracing(false);
-        playSuccess();
-        
-        // Load target intelligence dossier
+    setTraceLog(["[TRACER] Initializing remote geolocation packet ping...", "[TRACER] Routing packets through global proxy relays..."]);
+    playKeyboard();
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/trace/${ip}`);
+      const data = await response.json();
+      
+      setIsTracing(false);
+      playSuccess();
+
+      if (data.status === "success") {
         setResult({
-          hostname: "ns3.corporate-vault.net",
-          isp: "Spectra Security Fiber LLC",
-          location: "Geneva, Switzerland (46.2044° N, 6.1432° E)",
-          os: "CentOS Linux 7.4 (Kernel 3.10 - VULNERABLE)",
-          threatIndex: "HIGH (8.7/10)",
-          activePorts: "22/TCP, 80/TCP, 443/TCP, 8080/TCP"
+          hostname: data.org || "Unknown Domain",
+          isp: data.isp || "Unknown ISP",
+          location: `${data.city}, ${data.country} (${data.lat}, ${data.lon})`,
+          os: "Unknown (Awaiting OS Fingerprint)",
+          threatIndex: "PENDING SCAN",
+          activePorts: "REQUIRES PORT SCAN"
+        });
+      } else {
+        setResult({
+          hostname: "RESOLUTION FAILED",
+          isp: "UNKNOWN",
+          location: "UNKNOWN",
+          os: "UNKNOWN",
+          threatIndex: "N/A",
+          activePorts: "N/A"
         });
       }
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      setIsTracing(false);
+      setTraceLog(prev => [...prev, "[ERROR] Connection to backend tracing server failed!"]);
+    }
   };
 
   return (

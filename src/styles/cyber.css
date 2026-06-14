@@ -1,0 +1,288 @@
+/* ==========================================================================
+   FUTURISTIC SOC COMMAND CENTER CSS
+   ========================================================================== */
+
+/* Neon Text Shadows & Glows */
+.text-shadow-purple {
+  text-shadow: 0 0 8px rgba(168, 85, 247, 0.6), 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+.text-shadow-blue {
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.6), 0 0 20px rgba(0, 229, 255, 0.3);
+}
+
+.text-shadow-red {
+  text-shadow: 0 0 8px rgba(255, 42, 42, 0.6), 0 0 20px rgba(255, 42, 42, 0.3);
+}
+
+/* Neon Glow Cards */
+.cyber-card-purple {
+  position: relative;
+  background: rgba(10, 5, 20, 0.65);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.05);
+}
+
+.cyber-card-purple::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.cyber-card-blue {
+  position: relative;
+  background: rgba(5, 12, 22, 0.65);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.05);
+}
+
+.cyber-card-red {
+  position: relative;
+  background: rgba(15, 5, 5, 0.65);
+  border: 1px solid rgba(255, 42, 42, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 42, 42, 0.05);
+}
+
+/* Holographic sweep lines */
+.holo-scan {
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-scan::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(168, 85, 247, 0.08) 50%, transparent);
+  animation: scanning-laser 6s linear infinite;
+  pointer-events: none;
+}
+
+.cyber-card-blue.holo-scan::after {
+  background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.1) 50%, transparent);
+}
+
+.cyber-card-red.holo-scan::after {
+  background: linear-gradient(to bottom, transparent, rgba(255, 42, 42, 0.1) 50%, transparent);
+}
+
+@keyframes scanning-laser {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+/* Cyber Glitch Effect */
+.cyber-glitch {
+  position: relative;
+}
+
+.cyber-glitch::before,
+.cyber-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #05020a;
+}
+
+.cyber-glitch::before {
+  left: 2px;
+  text-shadow: -1px 0 #ff00c1;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.cyber-glitch::after {
+  left: -2px;
+  text-shadow: -1px 0 #00fff9, 0 1px #00fff9;
+  clip: rect(85px, 450px, 140px, 0);
+  animation: glitch-anim-2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(15px, 9999px, 66px, 0); }
+  5% { clip: rect(45px, 9999px, 86px, 0); }
+  10% { clip: rect(12px, 9999px, 33px, 0); }
+  15% { clip: rect(85px, 9999px, 5px, 0); }
+  20% { clip: rect(4px, 9999px, 90px, 0); }
+  25% { clip: rect(120px, 9999px, 140px, 0); }
+  30% { clip: rect(60px, 9999px, 20px, 0); }
+  35% { clip: rect(80px, 9999px, 110px, 0); }
+  40% { clip: rect(10px, 9999px, 30px, 0); }
+  45% { clip: rect(95px, 9999px, 40px, 0); }
+  50% { clip: rect(35px, 9999px, 85px, 0); }
+  55% { clip: rect(5px, 9999px, 120px, 0); }
+  60% { clip: rect(110px, 9999px, 15px, 0); }
+  65% { clip: rect(40px, 9999px, 60px, 0); }
+  70% { clip: rect(70px, 9999px, 115px, 0); }
+  75% { clip: rect(25px, 9999px, 95px, 0); }
+  80% { clip: rect(130px, 9999px, 5px, 0); }
+  85% { clip: rect(15px, 9999px, 45px, 0); }
+  90% { clip: rect(55px, 9999px, 130px, 0); }
+  95% { clip: rect(85px, 9999px, 40px, 0); }
+  100% { clip: rect(30px, 9999px, 75px, 0); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip: rect(65px, 9999px, 120px, 0); }
+  5% { clip: rect(5px, 9999px, 45px, 0); }
+  10% { clip: rect(80px, 9999px, 110px, 0); }
+  15% { clip: rect(20px, 9999px, 55px, 0); }
+  20% { clip: rect(115px, 9999px, 135px, 0); }
+  25% { clip: rect(40px, 9999px, 90px, 0); }
+  30% { clip: rect(95px, 9999px, 15px, 0); }
+  35% { clip: rect(10px, 9999px, 30px, 0); }
+  40% { clip: rect(75px, 9999px, 85px, 0); }
+  45% { clip: rect(50px, 9999px, 125px, 0); }
+  50% { clip: rect(130px, 9999px, 5px, 0); }
+  55% { clip: rect(30px, 9999px, 95px, 0); }
+  60% { clip: rect(85px, 9999px, 20px, 0); }
+  65% { clip: rect(15px, 9999px, 60px, 0); }
+  70% { clip: rect(110px, 9999px, 140px, 0); }
+  75% { clip: rect(45px, 9999px, 80px, 0); }
+  80% { clip: rect(5px, 9999px, 115px, 0); }
+  85% { clip: rect(125px, 9999px, 10px, 0); }
+  90% { clip: rect(70px, 9999px, 55px, 0); }
+  95% { clip: rect(35px, 9999px, 95px, 0); }
+  100% { clip: rect(90px, 9999px, 30px, 0); }
+}
+
+/* Custom Cyber Scrollbars */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.3);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.6);
+}
+
+.blue-theme .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+}
+
+.blue-theme .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.6);
+}
+
+.red-theme .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 42, 42, 0.3);
+}
+
+.red-theme .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 42, 42, 0.6);
+}
+
+/* Cyber Terminal Styling */
+.cyber-terminal {
+  font-family: 'Share Tech Mono', monospace;
+  background: rgba(2, 4, 8, 0.95);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.15), 0 4px 24px rgba(0,0,0,0.6);
+}
+
+.cyber-terminal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+/* Pulsing radar pings */
+.radar-ping {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.6);
+  animation: ping-grow 2s infinite ease-out;
+}
+
+@keyframes ping-grow {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+  }
+}
+
+/* Corner Trim elements */
+.corner-trim {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.corner-trim.top-left {
+  top: 6px;
+  left: 6px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.corner-trim.top-right {
+  top: 6px;
+  right: 6px;
+  border-top: 2px solid;
+  border-right: 2px solid;
+}
+
+.corner-trim.bottom-left {
+  bottom: 6px;
+  left: 6px;
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+}
+
+.corner-trim.bottom-right {
+  bottom: 6px;
+  right: 6px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+/* Hover glow lines */
+.hover-neon-purple:hover {
+  border-color: rgba(168, 85, 247, 0.8) !important;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.25), inset 0 0 10px rgba(168, 85, 247, 0.05);
+}
+
+.hover-neon-blue:hover {
+  border-color: rgba(0, 229, 255, 0.8) !important;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.25), inset 0 0 10px rgba(0, 229, 255, 0.05);
+}
+
+.hover-neon-red:hover {
+  border-color: rgba(255, 42, 42, 0.8) !important;
+  box-shadow: 0 0 25px rgba(255, 42, 42, 0.25), inset 0 0 10px rgba(255, 42, 42, 0.05);
+}

@@ -2,7 +2,11 @@
 
 A modern cybersecurity dashboard built with React that simulates both Blue Team (Defensive Security Operations) and Red Team (Security Assessment Operations) workflows.
 
+<<<<<<< HEAD
 ## 🚀 Features
+=======
+Currently, two official plugins are available:
+>>>>>>> dbc9b69 (Improve dashboard animations and UI)
 
 ### 🛡️ Blue Team
 
