@@ -20,31 +20,51 @@ export default function PortScanner() {
   const [progress, setProgress] = useState(0);
   const [exploitLog, setExploitLog] = useState(null);
 
-  const handleScan = () => {
+  const getServiceName = (port) => {
+    const map = { 21: "FTP", 22: "SSH", 25: "SMTP", 80: "HTTP", 111: "RPC", 443: "HTTPS", 3306: "MySQL", 8080: "HTTP-Alt" };
+    return map[port] || "Unknown";
+  };
+
+  const handleScan = async () => {
     playClick();
     setIsScanning(true);
     setScannedPorts([]);
-    setProgress(0);
+    setProgress(20);
     setExploitLog(null);
+    playKeyboard();
 
-    let currentIdx = 0;
-    const interval = setInterval(() => {
-      if (currentIdx < SCANNED_PORT_TEMPLATES.length) {
-        setScannedPorts(prev => [...prev, SCANNED_PORT_TEMPLATES[currentIdx]]);
-        setProgress(Math.floor(((currentIdx + 1) / SCANNED_PORT_TEMPLATES.length) * 100));
-        playKeyboard();
+    const portsToScan = [21, 22, 25, 80, 111, 443, 3306, 8080];
+
+    try {
+      const response = await fetch("http://localhost:5000/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ip: target, ports: portsToScan })
+      });
+      
+      setProgress(75);
+      
+      const data = await response.json();
+      
+      if (data.results) {
+        const formattedPorts = data.results.map(r => ({
+          port: r.port,
+          service: getServiceName(r.port),
+          status: r.status === "OPEN" ? "OPEN" : "CLOSED",
+          banner: r.status === "OPEN" ? "Service Responsive" : "-"
+        }));
         
-        if (SCANNED_PORT_TEMPLATES[currentIdx].status === "OPEN") {
-          playWarning();
-        }
-        
-        currentIdx++;
-      } else {
-        clearInterval(interval);
-        setIsScanning(false);
+        setScannedPorts(formattedPorts);
+        setProgress(100);
         playSuccess();
       }
-    }, 450);
+    } catch (err) {
+      console.error("Backend Error:", err);
+      playWarning();
+      setExploitLog("[ERROR] Failed to communicate with full-stack Node.js backend. Is it running?");
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const handleTriggerExploit = (port, banner) => {

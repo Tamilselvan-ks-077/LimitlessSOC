@@ -1,16 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaShieldAlt, FaToggleOn, FaToggleOff, FaPlus, FaTrashAlt, FaCheckCircle, FaBan } from "react-icons/fa";
 import { playClick, playSuccess } from "../../utils/audio";
 
-const INITIAL_RULES = [
-  { id: 1, name: "Block SSH Root Access", port: "22", protocol: "TCP", action: "BLOCK", target: "ANY", active: true },
-  { id: 2, name: "Allow HTTP Web Traffic", port: "80", protocol: "TCP", action: "ALLOW", target: "ANY", active: true },
-  { id: 3, name: "Allow HTTPS Secure", port: "443", protocol: "TCP", action: "ALLOW", target: "ANY", active: true },
-  { id: 4, name: "Restrict Database Port", port: "5432", protocol: "TCP", action: "BLOCK", target: "192.168.1.100", active: false }
-];
-
 export default function FirewallRules() {
-  const [rules, setRules] = useState(INITIAL_RULES);
+  const [rules, setRules] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newRule, setNewRule] = useState({
     name: "",
@@ -20,38 +13,59 @@ export default function FirewallRules() {
     target: "ANY"
   });
 
-  const handleToggleActive = (id) => {
+  // Fetch rules from backend on mount
+  useEffect(() => {
+    fetch("http://localhost:5000/api/firewall")
+      .then(res => res.json())
+      .then(data => setRules(data))
+      .catch(err => console.error("Failed to load firewall rules", err));
+  }, []);
+
+  const handleToggleActive = async (id) => {
     playClick();
-    setRules(prev =>
-      prev.map(r => (r.id === id ? { ...r, active: !r.active } : r))
-    );
+    try {
+      const res = await fetch(`http://localhost:5000/api/firewall/${id}`, { method: "PUT" });
+      if (res.ok) {
+        setRules(prev => prev.map(r => (r.id === id ? { ...r, active: !r.active } : r)));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleRemoveRule = (id) => {
+  const handleRemoveRule = async (id) => {
     playClick();
-    setRules(prev => prev.filter(r => r.id !== id));
+    try {
+      const res = await fetch(`http://localhost:5000/api/firewall/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setRules(prev => prev.filter(r => r.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleAddRule = (e) => {
+  const handleAddRule = async (e) => {
     e.preventDefault();
     if (!newRule.name || !newRule.port) return;
 
-    playSuccess();
-    const createdRule = {
-      id: Date.now(),
-      ...newRule,
-      active: true
-    };
-
-    setRules(prev => [...prev, createdRule]);
-    setNewRule({
-      name: "",
-      port: "",
-      protocol: "TCP",
-      action: "BLOCK",
-      target: "ANY"
-    });
-    setShowAddForm(false);
+    try {
+      const res = await fetch("http://localhost:5000/api/firewall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRule)
+      });
+      
+      if (res.ok) {
+        const createdRule = await res.json();
+        playSuccess();
+        setRules(prev => [...prev, createdRule]);
+        setNewRule({ name: "", port: "", protocol: "TCP", action: "BLOCK", target: "ANY" });
+        setShowAddForm(false);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
